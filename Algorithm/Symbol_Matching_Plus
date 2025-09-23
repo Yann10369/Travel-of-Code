@@ -1,0 +1,109 @@
+#include <stdio.h>
+#define MAX_SIZE 101
+static char map[][3] = {
+    {'(', '\0'},
+    {'{', '\0'},
+    {'[', '\0'},
+    {'/', '*', '\0'},
+    {'*', '/', '\0'},
+    {']', '\0'},
+    {'}', '\0'},
+    {')', '\0'}};
+int hash(char **cc)
+{
+    char *c = *cc;
+    switch (*c)
+    {
+    case '(':
+        return 1;
+    case '{':
+        return 2;
+    case '[':
+        return 3;
+    case '/':
+        if (*(c + 1) == '*')
+        {
+            (*cc)++; // 先解引用，再递增
+            return 4;
+        }
+        else
+            return 0;
+    case '*':
+        if (*(c + 1) == '/')
+        {
+            (*cc)++; // 先解引用，再递增
+            return 5;
+        }
+        else
+            return 0;
+    case ')':
+        return 8;
+    case '}':
+        return 7;
+    case ']':
+        return 6;
+    default:
+        return 0;
+    }
+}
+bool pop(int *stack, int *top)
+{
+    (*top) -= 2;
+    if (*top < -1)
+    {
+        return false;
+    }
+    if (*top < 0)
+    {
+        if (stack[*top + 1] < 5)
+        {
+            printf("NO\n%s-?", map[stack[*top + 1] - 1]);
+            return true;
+        }
+        printf("NO\n?-%s", map[stack[*top + 1] - 1]);
+        return true;
+    }
+    else
+    {
+        if (stack[*top] + stack[*top + 1] != 9)
+        {
+            printf("NO\n%s-?", map[stack[*top] - 1]);
+            return true;
+        }
+    }
+    return false;
+}
+int main()
+{
+    char str[MAX_SIZE] = {'\0'};
+    char *c;
+    int stack[MAX_SIZE] = {0};
+    int top = 0;
+    do
+    {
+        gets(str);
+        c = str;
+        while (*c != '\0')
+        {
+            int hash_result = hash(&c);
+            if (hash_result != 0)
+            {
+                stack[top++] = hash_result;
+                if (hash_result > 4)
+                {
+                    if (pop(stack, &top))
+                    {
+                        return 0;
+                    }
+                }
+            }
+            c++;
+        }
+    } while (str[0] != '.' || str[1] != '\0');
+    if (pop(stack, &top))
+    {
+        return 0;
+    }
+    printf("YES");
+    return 0;
+}
